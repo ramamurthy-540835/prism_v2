@@ -21,10 +21,18 @@ class PrismV1Client:
                 "success": True,
                 "received": payload,
             }
+        endpoint = f"{self.base_url}/api/coder/{operation}"
+        request_payload = {"task": payload, "mode": operation, "prompt_uid": payload.get("prompt_uid")}
         response = requests.post(
-            f"{self.base_url}/api/coder/{operation}",
-            json={"task": payload, "mode": operation, "prompt_uid": payload.get("prompt_uid")},
+            endpoint,
+            json=request_payload,
             timeout=self.timeout,
         )
         response.raise_for_status()
-        return response.json()
+        response_payload = response.json()
+        if isinstance(response_payload, dict):
+            response_payload.setdefault("bridge", "prism_v1")
+            response_payload.setdefault("mode", operation)
+            response_payload["prism_v1_endpoint"] = endpoint
+            response_payload["prism_v1_request"] = request_payload
+        return response_payload
