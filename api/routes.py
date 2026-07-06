@@ -53,6 +53,7 @@ def run_task(payload: dict):
         "version": payload.get("version"),
         "workspace_id": payload.get("workspace_id"),
         "project_name": payload.get("project_name"),
+        "approval": payload.get("approval"),
         "approval_required": payload.get("approval_required") or payload.get("approval"),
     }
     return kernel.run(task, operation=operation, context=context)

@@ -44,10 +44,12 @@ class BootLoader:
         for node in self.scheduler.ordered(graph):
             model = self.router.select(node.to_dict(), intent, rules)
             agent = self.agents[node.agent]
-            output = agent.run(node.to_dict(), model, intent=intent, rules=rules)
+            output = agent.run(node.to_dict(), model, intent=intent, rules=rules, context=request.context)
             if node.type == "execute":
                 output = self.bridge.send(output, operation=node.operation)
             results.append(output)
+            if isinstance(output, dict) and output.get("error"):
+                break
 
         status = "success" if all(not r.get("error") for r in results) else "error"
         result = KernelResult(
